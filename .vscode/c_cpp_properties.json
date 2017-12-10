@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
+                "~/Documents/Arduino/libraries"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": false,
+                "path": [
+                    "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
+                    "~/Documents/Arduino/libraries",
+                    "~/Work/Devel/IoT/Kiotlog/Arduino"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks",
+                "~/Documents/Arduino/libraries"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
+                "/home/mancho/Documents/Arduino/libraries",
+                "/home/mancho/Dropbox/Work/Devel/IoT/Kiotlog/Arduino",
+                "/home/mancho/Dropbox/Work/Devel/IoT/Kiotlog/Arduino/KiotlogSN/src"           
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": false,
+                "path": [
+                    "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
+                    "/home/manch/Documents/Arduino/libraries",
+                    "/home/mancho/Dropbox/Work/Devel/IoT/Kiotlog/Arduino"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks",
+                "~/Documents/Arduino/libraries"
+            ]
+        }
+    ],
+    "version": 3
+}

@@ -1,0 +1,5 @@
+{
+    "board": "adafruit:avr:feather32u4",
+    "sketch": "../KiotlogSNFona/KiotlogSNFona.ino",
+    "port": "/dev/ttyACM0"
+}

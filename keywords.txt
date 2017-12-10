@@ -1,0 +1,4 @@
+KiotlogSN   KEYWORD1
+
+begin       KEYWORD2
+loopOnce    KEYWORD2
