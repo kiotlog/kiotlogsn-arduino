@@ -27,8 +27,7 @@
 
 #include "GsmHelper.h"
 
-class FonaPinout {
-public:
+struct FonaPinout {
         FonaPinout(uint8_t tx, uint8_t rx, uint8_t key, uint8_t rst, uint8_t dtr):
             tx(tx), rx(rx), key(key), rst(rst), dtr(dtr) {};
 

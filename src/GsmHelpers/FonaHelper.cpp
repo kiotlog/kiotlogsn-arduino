@@ -32,8 +32,6 @@ GsmFona::GsmFona(const gsm_module_t model, Adafruit_FONA * fona, SoftwareSerial 
 
 void GsmFona::start()
 {
-    // pinMode(_pins.tx, INPUT);
-    // pinMode(_pins.rx, OUTPUT);
     pinMode(_pins.key, OUTPUT);
     pinMode(_pins.rst, OUTPUT);
     pinMode(_pins.dtr, OUTPUT);
@@ -146,8 +144,6 @@ void GsmFona::transparent(const int registered_status)
     char buf[50];
     char *bufp = &buf[0];
 
-    // memset(buf, 0, 50);
-
     bufp += sprintf(bufp, "AT+CSTT=\"");
     bufp += sprintf(bufp, _apn);
     bufp += sprintf(bufp, "\"");
@@ -167,6 +163,9 @@ void GsmFona::transparent(const int registered_status)
 
     // Get IP Address
     _module->sendCheckReply(F("AT+CIFSR"), F("OK"), _timeout);
+
+    // DTR
+    // _module->sendCheckReply(F("AT+IFC=2,2"), F("OK"));
 }
 
 void GsmFona::connect()
@@ -186,7 +185,6 @@ void GsmFona::connect()
     _module->sendCheckReply(cs, F("OK"), _timeout);
     _module->expectReply(F("CONNECT"), _timeout);
     _serial->flush();
-
 }
 
 void GsmFona::exitDataMode()
