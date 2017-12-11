@@ -20,11 +20,12 @@
 #include <KiotlogSN.h>
 
 template <class T>
-KiotlogSN<T>::KiotlogSN(T &gsm, MQTTSN * mqttsn, const char *&topic, const char *&clientid, const uint32_t interval, const boolean preregistered) :
-    _gsm(gsm), _sn(mqttsn, topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
+KiotlogSN<T>::KiotlogSN(T &gsm, const char *&topic, const char *&clientid, const uint32_t interval, const boolean preregistered) :
+    _gsm(gsm), _sn(topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
 
 template <class T>
-KiotlogSN<T>::Sn::Sn(MQTTSN * mqttsn, const char *&topic, const char *&clientid, const uint32_t interval, const boolean pre) : _client(mqttsn), _id(clientid), _topic(topic), _interval(interval), _pre(pre) {}
+KiotlogSN<T>::Sn::Sn(const char *&topic, const char *&clientid, const uint32_t interval, const boolean pre) :
+    _id(clientid), _topic(topic), _interval(interval), _pre(pre) { }
 
 template <class T>
 void KiotlogSN<T>::start()
@@ -67,7 +68,7 @@ void KiotlogSN<T>::sendPayload(const uint8_t * data, size_t data_len, const uint
             break;
         case DISCONNECTING:
             Serial.println("Disconnecting: Sleep");
-            if (!_sn._client->connected()) {
+            if (!_sn._client.connected()) {
                 _status = SLEEPING;
             }
             break;
@@ -93,19 +94,19 @@ void KiotlogSN<T>::checkForData()
     Serial.println("Checking for data");
 
     while (_gsm._serial->available()) buffer[cnt++] = _gsm._serial->read();
-    if (cnt > 0) _sn._client->parse_stream(buf, cnt);
+    if (cnt > 0) _sn._client.parse_stream(buf, cnt);
     delay(2000);
 
-    while (_sn._client->wait_for_response()) {
+    while (_sn._client.wait_for_response()) {
         while (_gsm._serial->available()) buffer[cnt++] = _gsm._serial->read();
-        if (cnt > 0) _sn._client->parse_stream(buf, cnt);
+        if (cnt > 0) _sn._client.parse_stream(buf, cnt);
     }
 }
 
 template <class T>
 void KiotlogSN<T>::connect()
 {
-    if (!_sn._client->connected()) _sn._client->connect(_sn._flags, 10, _sn._id);
+    if (!_sn._client.connected()) _sn._client.connect(_sn._flags, 10, _sn._id);
 }
 
 template <class T>
@@ -124,10 +125,10 @@ uint16_t KiotlogSN<T>::registerTopic()
     }
     else
     {
-        _sn._topic_id = (uint16_t)_sn._client->find_topic_id(_sn._topic, &index);
+        _sn._topic_id = (uint16_t)_sn._client.find_topic_id(_sn._topic, &index);
         if (_sn._topic_id == 0xffff)
         {
-            _sn._client->register_topic(_sn._topic);
+            _sn._client.register_topic(_sn._topic);
         }
         else
         {
@@ -148,14 +149,14 @@ void KiotlogSN<T>::publish(const uint8_t * data, size_t data_len, const uint8_t 
 
     size_t len = _stream.available();
     const uint8_t *s = _stream;
-    
-    _sn._client->publish(_sn._flags, _sn._topic_id, s, len);
+
+    _sn._client.publish(_sn._flags, _sn._topic_id, s, len);
 }
 
 template <class T>
 void KiotlogSN<T>::disconnect()
 {
-    _sn._client->disconnect(_sn._interval * 2UL + 60);
+    _sn._client.disconnect(_sn._interval * 2UL + 60);
 }
 
 template <class T>
@@ -163,4 +164,3 @@ void KiotlogSN<T>::sleep()
 {
     _gsm.sleep();
 }
-

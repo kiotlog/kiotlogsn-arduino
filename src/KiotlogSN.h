@@ -31,12 +31,10 @@
 template <typename GsmType>
 class KiotlogSN
 {
-    
+
 public:
     KiotlogSN() = default;
-
-    KiotlogSN(GsmType &gsm, MQTTSN * mqttsn, const char* &topic, const char* &clientid, const uint32_t interval, const boolean preregistered = false);
-    
+    KiotlogSN(GsmType &gsm, const char* &topic, const char* &clientid, const uint32_t interval, const boolean preregistered = false);
     ~KiotlogSN() = default;
 
     void start();
@@ -45,9 +43,9 @@ public:
     class Sn {
         template <typename G> friend class KiotlogSN;
     public:
-        Sn(MQTTSN * mqttsn, const char* &topic, const char* &clientid, const uint32_t interval, const boolean pre);
+        Sn(const char* &topic, const char* &clientid, const uint32_t interval, const boolean pre);
     protected:
-        MQTTSN * _client;
+        MQTTSN _client;
         const char* _id;
         const char* _topic;
         const uint32_t _interval;
