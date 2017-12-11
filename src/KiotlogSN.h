@@ -32,7 +32,7 @@ class KiotlogSN
 
 public:
     KiotlogSN() = default;
-    KiotlogSN(GsmType &gsm, const char* &topic, const char* &clientid, const uint32_t interval, const boolean preregistered = false);
+    KiotlogSN(GsmType &gsm, const char* topic, const char* clientid, const uint32_t interval, const boolean preregistered = false);
     ~KiotlogSN() = default;
 
     void start();

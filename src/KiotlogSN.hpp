@@ -20,7 +20,7 @@
 #include <KiotlogSN.h>
 
 template <class T>
-KiotlogSN<T>::KiotlogSN(T &gsm, const char *&topic, const char *&clientid, const uint32_t interval, const boolean preregistered) :
+KiotlogSN<T>::KiotlogSN(T &gsm, const char *topic, const char *clientid, const uint32_t interval, const boolean preregistered) :
     _gsm(gsm), _sn(topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
 
 template <class T>
