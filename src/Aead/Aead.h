@@ -31,24 +31,27 @@
 
 template <unsigned int Len>
 class Aead {
-    
-    template<class GsmType> friend class KiotlogSN;
 
 public:
     Aead(const uint8_t * key);
-    
-    void authenc(const uint8_t * payload);
-    void increment_iv();    
-    
+
+    void authEncrypt(const uint8_t * payload);
+    void updateStatus();
+
     uint8_t data[Len + TAG_SIZE];
     uint8_t nonce[NONCE_SIZE];
-    uint8_t * key;
+
+    const size_t data_len = Len + TAG_SIZE;
+    const size_t nonce_len = NONCE_SIZE;
 
 protected:
     ChaChaPoly _chachapoly;
 
+    uint8_t * _key;
     uint8_t _cipher[Len];
     uint8_t _tag[TAG_SIZE];
+
+    void increment_iv();
 };
 
 #include "Aead.hpp"
