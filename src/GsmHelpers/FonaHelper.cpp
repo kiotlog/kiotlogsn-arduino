@@ -151,11 +151,9 @@ void GsmFona::transparent(const int registered_status)
     bufp += sprintf(bufp, "AT+CSTT=\"");
     bufp += sprintf(bufp, _apn);
     bufp += sprintf(bufp, "\"");
-    
-    Serial.println(buf);
 
     _module->sendCheckReply(buf, F("OK"), _timeout);
-    
+
     // Activate GPRS
     while (!_module->sendCheckReply(F("AT+CGATT=1"), F("OK"), _timeout))
 #if KL_DEBUG
@@ -193,8 +191,6 @@ void GsmFona::connect()
 
 void GsmFona::exitDataMode()
 {
-    Serial.println("Exiting Transparent Mode.");
-
 #if KL_DEBUG
     delay(1050);
 #else
@@ -226,7 +222,6 @@ void GsmFona::exitDataMode()
 #endif
 
     _module->expectReply(F("OK"), _timeout);
-    Serial.println("In AT Mode");
 }
 
 void GsmFona::enterDataMode()

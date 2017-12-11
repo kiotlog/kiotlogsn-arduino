@@ -26,8 +26,6 @@
 #include "GsmHelpers/FonaHelper.h"
 #include "Aead/Aead.h"
 
-// template <unsigned int L> class Aead;
-
 template <typename GsmType>
 class KiotlogSN
 {

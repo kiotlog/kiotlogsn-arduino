@@ -30,7 +30,6 @@ KiotlogSN<T>::Sn::Sn(const char *&topic, const char *&clientid, const uint32_t i
 template <class T>
 void KiotlogSN<T>::start()
 {
-    Serial.println("Beginning");
     _gsm.start();
 }
 
@@ -46,42 +45,34 @@ void KiotlogSN<T>::sendPayload(const uint8_t * data, size_t data_len, const uint
         switch (_status)
         {
         case STARTING:
-            Serial.println("Starting: Connect");
             connect();
             _status = CONNECTING;
             break;
         case CONNECTING:
-            Serial.println("Connecting: Register Topic");
             if (registerTopic() != 0xffff){
                 _status = REGISTERING;
             }
             break;
         case REGISTERING:
-            Serial.println("Registering Topic: Publish");
             publish(data, data_len, nonce, nonce_len);
             _status = PUBLISHING;
             break;
         case PUBLISHING:
-            Serial.println("Publishing: Disconnect");
             disconnect();
             _status = DISCONNECTING;
             break;
         case DISCONNECTING:
-            Serial.println("Disconnecting: Sleep");
             if (!_sn._client.connected()) {
                 _status = SLEEPING;
             }
             break;
         case SLEEPING:
-            Serial.println("Sleeping: Start");
             sleep();
             _status = STARTING;
             done = true;
             break;
         }
     }
-
-    Serial.println("Done");
 }
 
 template <class T>
@@ -90,8 +81,6 @@ void KiotlogSN<T>::checkForData()
     uint16_t cnt = 0;
     uint8_t buffer[512];
     uint8_t *buf = &buffer[0];
-
-    Serial.println("Checking for data");
 
     while (_gsm._serial->available()) buffer[cnt++] = _gsm._serial->read();
     if (cnt > 0) _sn._client.parse_stream(buf, cnt);
