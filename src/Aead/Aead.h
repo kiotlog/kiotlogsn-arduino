@@ -29,12 +29,13 @@
 #define NONCE_SIZE 12
 #define TAG_SIZE 16
 
-template <unsigned int Len>
+template <size_t Len>
 class Aead {
 
 public:
     Aead(const uint8_t * key);
 
+    void begin(const uint8_t);
     void authEncrypt(const uint8_t * payload);
     void updateStatus();
 
@@ -47,7 +48,7 @@ public:
 protected:
     ChaChaPoly _chachapoly;
 
-    uint8_t * _key;
+    const uint8_t * _key;
     uint8_t _cipher[Len];
     uint8_t _tag[TAG_SIZE];
 

@@ -41,7 +41,7 @@ public:
     class Sn {
         template <typename G> friend class KiotlogSN;
     public:
-        Sn(const char* &topic, const char* &clientid, const uint32_t interval, const boolean pre);
+        Sn(const char* topic, const char* clientid, const uint32_t interval, const boolean pre);
     protected:
         MQTTSN _client;
         const char* _id;
@@ -76,7 +76,7 @@ private:
     uint16_t registerTopic();
     void publish(const uint8_t*, const size_t, const uint8_t*, const size_t);
     void disconnect();
-    void sleep();
+    void lowpower();
 };
 
 // template class KiotlogSN<GsmFona, Aead<8>>;
