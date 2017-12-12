@@ -21,9 +21,7 @@
 #define Fona_Helper_h
 #include <Arduino.h>
 
-#include <Adafruit_SleepyDog.h>
 #include <Adafruit_FONA.h>
-#include <SoftwareSerial.h>
 
 #include "GsmHelper.h"
 
@@ -39,35 +37,29 @@ struct FonaPinout {
 };
 
 
-class GsmFona
+class GsmFona : public GsmBase
 {
     template<class GsmType> friend class KiotlogSN;
 
 public:
     GsmFona() = default;
-    GsmFona(const gsm_module_t model, Adafruit_FONA * fona, SoftwareSerial * fonaSS, const FonaPinout& pinout, const char* apn, const char* broker, const uint16_t port);
+    GsmFona(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout& pinout, const char* apn, const char* broker, const uint16_t port);
     ~GsmFona() = default;
 
-    void start();
-    void reset();
-    void sleep();
-    void exitDataMode();
-    void enterDataMode();
+    void start() override;
+    void reset() override;
+    void lowpower() override;
+    void exitDataMode() override;
+    void enterDataMode() override;
 
 protected:
-    void wakeup();
-    void transparent(const int registered_status = 5);
-    void connect();
-
-    gsm_module_t _model;
-    const char * _apn;
-    const char * _broker;
-    uint16_t _port;
-    uint16_t _timeout = 10000;
+    void wakeup() override;
+    void transparent(const int registered_status = 5) override;
+    void connect() override;
 
 private:
     FonaPinout _pins;
     Adafruit_FONA * _module;
-    SoftwareSerial * _serial;
+    Stream * _serial;
 };
 #endif

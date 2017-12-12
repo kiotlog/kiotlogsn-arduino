@@ -19,16 +19,14 @@
 
 #include <Arduino.h>
 
-#include <SoftwareSerial.h>
-#include <Adafruit_SleepyDog.h>
 #include <Adafruit_FONA.h>
 
 #include "FonaHelper.h"
 
-#define KL_DEBUG 0
+// #define KL_DEBUG
 
-GsmFona::GsmFona(const gsm_module_t model, Adafruit_FONA * fona, SoftwareSerial * fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
-    _model(model), _apn(apn), _broker(broker), _port(port), _pins(pinout), _module(fona), _serial(fonaSS) { }
+GsmFona::GsmFona(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
+    GsmBase(model, apn, broker, port), _pins(pinout), _module(fona), _serial(&fonaSS) { }
 
 void GsmFona::start()
 {
@@ -52,30 +50,30 @@ void GsmFona::reset()
 
     digitalWrite(_pins.rst, HIGH);
 
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(10);
 #else
-    Watchdog.sleep(10);
+    sleep(10);
 #endif
 
     digitalWrite(_pins.rst, LOW);
 
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(2000);
 #else
-    Watchdog.sleep(2000);
+    sleep(2000);
 #endif
 
     digitalWrite(_pins.rst, HIGH);
 
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(1000);
 #else
-    Watchdog.sleep(1000);
+    sleep(1000);
 #endif
 }
 
-void GsmFona::sleep()
+void GsmFona::lowpower()
 {
     digitalWrite(_pins.key, LOW);
     delay(3000);
@@ -101,10 +99,10 @@ void GsmFona::wakeup()
         digitalWrite(_pins.key, LOW);
         delay(wait);
         digitalWrite(_pins.key, HIGH);
-#if KL_DEBUG
+#if defined(KL_DEBUG)
         delay(1000);
 #else
-        Watchdog.sleep(1000);
+        sleep(1000);
 #endif
     }
 
@@ -119,26 +117,26 @@ void GsmFona::transparent(const int registered_status)
     // Activate Transparent Mode
     while (!_module->sendCheckReply(F("AT+CIPMODE=1"), F("OK")))
     {
-#if KL_DEBUG
+#if defined(KL_DEBUG)
         delay(2000);
 #else
-        Watchdog.sleep(2000);
+        sleep(2000);
 #endif
     }
 
     // Wait for Network
     while (_module->getNetworkStatus() != registered_status)
     {
-#if KL_DEBUG
+#if defined(KL_DEBUG)
         delay(1000);
 #else
-        Watchdog.sleep(1000);
+        sleep(1000);
 #endif
     }
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(7000);
 #else
-    Watchdog.sleep(7000);
+    sleep(7000);
 #endif
     // Set APN
     char buf[50];
@@ -152,10 +150,10 @@ void GsmFona::transparent(const int registered_status)
 
     // Activate GPRS
     while (!_module->sendCheckReply(F("AT+CGATT=1"), F("OK"), _timeout))
-#if KL_DEBUG
+#if defined(KL_DEBUG)
         delay(1000);
 #else
-        Watchdog.sleep(1000);
+        sleep(1000);
 #endif
 
     // Activate Wireless
@@ -184,15 +182,15 @@ void GsmFona::connect()
     // Connect UDP
     _module->sendCheckReply(cs, F("OK"), _timeout);
     _module->expectReply(F("CONNECT"), _timeout);
-    _serial->flush();
+    // _serial->flush();
 }
 
 void GsmFona::exitDataMode()
 {
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(1050);
 #else
-    Watchdog.sleep(1050);
+    sleep(1050);
 #endif
 
     switch (_model)
@@ -200,10 +198,10 @@ void GsmFona::exitDataMode()
     case FONA_feather:
     case FONA_debug:
         digitalWrite(_pins.dtr, LOW);
-#if KL_DEBUG
+#if defined(KL_DEBUG)
         delay(1050);
 #else
-        Watchdog.sleep(1050);
+        sleep(1050);
 #endif
         digitalWrite(_pins.dtr, HIGH);
         break;
@@ -213,10 +211,10 @@ void GsmFona::exitDataMode()
         break;
     }
 
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(1050);
 #else
-    Watchdog.sleep(1050);
+    sleep(1050);
 #endif
 
     _module->expectReply(F("OK"), _timeout);
@@ -224,15 +222,15 @@ void GsmFona::exitDataMode()
 
 void GsmFona::enterDataMode()
 {
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(2050);
 #else
-    Watchdog.sleep(2050);
+    sleep(2050);
 #endif
     _module->sendCheckReply(F("ATO"), F("CONNECT"), _timeout);
-#if KL_DEBUG
+#if defined(KL_DEBUG)
     delay(2050);
 #else
-    Watchdog.sleep(2050);
+    sleep(2050);
 #endif
 }
