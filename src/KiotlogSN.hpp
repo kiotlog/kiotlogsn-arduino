@@ -44,11 +44,10 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
 
     while (!done)
     {
-#if defined(KL_DEBUG)
+        #if defined(KL_DEBUG)
         Serial.println("Checking for data");
 #endif
         checkForData();
-
         switch (_status)
         {
         case STARTING:
@@ -95,12 +94,12 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
 #if defined(KL_DEBUG)
             Serial.println("SLEEPING");
 #endif
-
             lowpower();
             _status = STARTING;
             done = true;
             break;
         }
+
     }
 }
 
@@ -111,16 +110,16 @@ void KiotlogSN<T>::checkForData()
     uint8_t buffer[512];
     uint8_t *buf = &buffer[0];
 
-    while (_gsm._serial->available())
-        buffer[cnt++] = _gsm._serial->read();
+    cnt = _gsm.getPacket(buf);
+
     if (cnt > 0)
         _sn._client.parse_stream(buf, cnt);
+
     delay(2000);
 
     while (_sn._client.wait_for_response())
     {
-        while (_gsm._serial->available())
-            buffer[cnt++] = _gsm._serial->read();
+        cnt = _gsm.getPacket(buf);
         if (cnt > 0)
             _sn._client.parse_stream(buf, cnt);
     }

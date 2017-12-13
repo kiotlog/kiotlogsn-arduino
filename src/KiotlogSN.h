@@ -24,6 +24,7 @@
 #include <mqttsn-messages.h>
 #include <msgpck.h>
 #include "GsmHelpers/FonaHelper.h"
+#include "GsmHelpers/MkrGsmHelper.h"
 #include "Aead/Aead.h"
 
 template <typename GsmType>

@@ -26,7 +26,7 @@
 // #define KL_DEBUG
 
 GsmFona::GsmFona(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
-    GsmBase(model, apn, broker, port), _pins(pinout), _module(fona), _serial(&fonaSS) { }
+    GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) { }
 
 void GsmFona::start()
 {
@@ -233,4 +233,13 @@ void GsmFona::enterDataMode()
 #else
     sleep(2050);
 #endif
+}
+
+size_t GsmFona::getPacket(uint8_t * buffer)
+{
+    size_t cnt = 0;
+    while (_serial->available())
+        buffer[cnt++] = _serial->read();
+
+    return cnt;
 }

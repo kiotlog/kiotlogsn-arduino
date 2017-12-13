@@ -25,6 +25,13 @@
 
 #include "GsmHelper.h"
 
+typedef enum gsm_modul_enum {
+    FONA_800,
+    FONA_80x,
+    FONA_feather,
+    FONA_debug
+} gsm_module_t;
+
 struct FonaPinout {
         FonaPinout(uint8_t tx, uint8_t rx, uint8_t key, uint8_t rst, uint8_t dtr):
             tx(tx), rx(rx), key(key), rst(rst), dtr(dtr) {};
@@ -49,17 +56,20 @@ public:
     void start() override;
     void reset() override;
     void lowpower() override;
-    void exitDataMode() override;
-    void enterDataMode() override;
+    size_t getPacket(uint8_t * buffer) override;
 
 protected:
     void wakeup() override;
-    void transparent(const int registered_status = 5) override;
     void connect() override;
+
+    void transparent(const int registered_status = 5);
+    void enterDataMode();
+    void exitDataMode();
 
 private:
     FonaPinout _pins;
     Adafruit_FONA * _module;
     Stream * _serial;
+    gsm_module_t _model;
 };
 #endif
