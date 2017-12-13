@@ -22,12 +22,7 @@
 
 #include <Arduino.h>
 
-typedef enum gsm_modul_enum {
-    FONA_800,
-    FONA_80x,
-    FONA_feather,
-    FONA_debug
-} gsm_module_t;
+
 
 class GsmBase
 {
@@ -36,30 +31,26 @@ class GsmBase
     GsmBase() = default;
     virtual ~GsmBase() = default;
 
-    GsmBase(const gsm_module_t model, const char * &apn, const char * &broker, const uint16_t port):
-        _model(model), _apn(apn), _broker(broker), _port(port) { };
+    GsmBase(const char * &apn, const char * &broker, const uint16_t port):
+        _apn(apn), _broker(broker), _port(port) { };
 
     virtual void start() = 0;
     virtual void reset() = 0;
     virtual void lowpower() = 0;
-    virtual void exitDataMode() = 0;
-    virtual void enterDataMode() = 0;
+    virtual size_t getPacket(uint8_t *) = 0;
 
 protected:
-    gsm_module_t _model;
     const char * _apn;
     const char * _broker;
     uint16_t _port;
     uint16_t _timeout = 10000;
 
-    // void sleep(uint32_t);
     void sleep (uint32_t sleep_duration) {
         extern void KLSN_sleep(uint32_t sleep_duration);
         KLSN_sleep(sleep_duration);
     }
 
     virtual void wakeup() = 0;
-    virtual void transparent(const int) = 0;
     virtual void connect() = 0;
 };
 
