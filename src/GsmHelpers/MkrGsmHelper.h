@@ -31,12 +31,13 @@ class MkrGsm : public GsmBase
 
 public:
     MkrGsm() = default;
-    MkrGsm(GSM &gsmAccess, GPRS &gprsAccess, GSMUDP * client, const char* apn, const char* broker, const uint16_t port);
+    MkrGsm(GSM& gsmAccess, GPRS& gprsAccess, GSMUDP& client, const char* apn, const char* broker, const uint16_t port);
     ~MkrGsm() = default;
 
     void start() override;
     void lowpower() override;
     size_t getPacket(uint8_t *) override;
+    void serialSend(uint8_t *, int) override;
 
     void reset()  override { };
 
@@ -45,9 +46,9 @@ protected:
     void connect() override;
 
 private:
-    GSM _mkr;
-    GPRS _gprs;
-    GSMUDP * _client;
-    Stream * _serial = _client;
+    GSM& _mkr;
+    GPRS& _gprs;
+    GSMUDP& _client;
 };
+
 #endif

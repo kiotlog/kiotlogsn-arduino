@@ -19,33 +19,48 @@
 
 #include "MkrGsmHelper.h"
 
- MkrGsm::MkrGsm(GSM& gsmAccess, GPRS& gprsAccess, GSMUDP * client, const char* apn, const char* broker, const uint16_t port) :
-    GsmBase(apn, broker, port), _mkr(gsmAccess), _gprs(gprsAccess), _client(client) { }
+MkrGsm::MkrGsm(GSM &gsmAccess, GPRS &gprsAccess, GSMUDP &client, const char *apn, const char *broker, const uint16_t port) : GsmBase(apn, broker, port), _mkr(gsmAccess), _gprs(gprsAccess), _client(client) {}
 
 void MkrGsm::start()
 {
     connect();
 }
 
-void MkrGsm::connect() {
-    _mkr.begin();
-    _gprs.attachGPRS(_apn, "", "");
-    _client->begin(_port);
+void MkrGsm::connect()
+{
+    boolean connected = false;
+
+    while (!connected){
+        if ((_mkr.begin() == GSM_READY) && (_gprs.attachGPRS(_apn, "", "") == GPRS_READY))
+            connected = true;
+        else
+            sleep(1000);
+    }
+    _client.begin(_port);
 }
 
-void MkrGsm::lowpower() {
-    _client->stop();
+void MkrGsm::lowpower()
+{
+    _client.stop();
     _gprs.detachGPRS();
     _mkr.shutdown();
 }
 
-size_t MkrGsm::getPacket(uint8_t * buffer)
+size_t MkrGsm::getPacket(uint8_t *buffer)
 {
     size_t bytes, cnt = 0;
-    // _client->beginPacket(_broker, _port);
-    if (_client->parsePacket())
-        while (_client->available())
-            buffer[cnt++] = _client->read();
-    // _client->endPacket();
+    if (_client.parsePacket())
+        while (_client.available())
+            buffer[cnt++] = _client.read();
     return cnt;
+}
+
+void MkrGsm::serialSend(uint8_t *message_buffer, int len)
+{
+    if (len > 0)
+    {
+        _client.beginPacket(_broker, _port);
+        _client.write(message_buffer, len);
+        _client.endPacket();
+    }
 }
