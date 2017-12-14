@@ -57,6 +57,7 @@ public:
     void reset() override;
     void lowpower() override;
     size_t getPacket(uint8_t * buffer) override;
+    void serialSend(uint8_t *, int) override;
 
 protected:
     void wakeup() override;
@@ -72,4 +73,5 @@ private:
     Stream * _serial;
     gsm_module_t _model;
 };
+
 #endif

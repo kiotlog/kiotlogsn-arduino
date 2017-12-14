@@ -243,3 +243,9 @@ size_t GsmFona::getPacket(uint8_t * buffer)
 
     return cnt;
 }
+
+void GsmFona::serialSend(uint8_t * buffer, int len)
+{
+    _serial->write(buffer, len);
+    _serial->flush();
+}

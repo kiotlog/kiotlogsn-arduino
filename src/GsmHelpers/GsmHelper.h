@@ -38,6 +38,7 @@ class GsmBase
     virtual void reset() = 0;
     virtual void lowpower() = 0;
     virtual size_t getPacket(uint8_t *) = 0;
+    virtual void serialSend(uint8_t *, int) = 0;
 
 protected:
     const char * _apn;
