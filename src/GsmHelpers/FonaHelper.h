@@ -44,14 +44,14 @@ struct FonaPinout {
 };
 
 
-class GsmFona : public GsmBase
+class FonaGsm : public GsmBase
 {
     template<class GsmType> friend class KiotlogSN;
 
 public:
-    GsmFona() = default;
-    GsmFona(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout& pinout, const char* apn, const char* broker, const uint16_t port);
-    ~GsmFona() = default;
+    FonaGsm() = default;
+    FonaGsm(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout& pinout, const char* apn, const char* broker, const uint16_t port);
+    ~FonaGsm() = default;
 
     void start() override;
     void reset() override;

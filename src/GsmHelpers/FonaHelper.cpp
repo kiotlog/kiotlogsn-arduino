@@ -25,10 +25,10 @@
 
 // #define KL_DEBUG
 
-GsmFona::GsmFona(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
+FonaGsm::FonaGsm(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
     GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) { }
 
-void GsmFona::start()
+void FonaGsm::start()
 {
     pinMode(_pins.key, OUTPUT);
     pinMode(_pins.rst, OUTPUT);
@@ -44,7 +44,7 @@ void GsmFona::start()
     connect();
 }
 
-void GsmFona::reset()
+void FonaGsm::reset()
 {
     pinMode(_pins.rst, OUTPUT);
 
@@ -73,14 +73,14 @@ void GsmFona::reset()
 #endif
 }
 
-void GsmFona::lowpower()
+void FonaGsm::lowpower()
 {
     digitalWrite(_pins.key, LOW);
     delay(3000);
     digitalWrite(_pins.key, HIGH);
 }
 
-void GsmFona::wakeup()
+void FonaGsm::wakeup()
 {
     int wait;
     switch (_model)
@@ -110,7 +110,7 @@ void GsmFona::wakeup()
     _module->sendCheckReply(F("AT+CVHU=0"), F("OK"));
 }
 
-void GsmFona::transparent(const int registered_status)
+void FonaGsm::transparent(const int registered_status)
 {
     // Enable exiting Data Mode with DTR pin
     if (_model == FONA_feather) _module->sendCheckReply(F("AT&D1"), F("OK"), _timeout);
@@ -166,7 +166,7 @@ void GsmFona::transparent(const int registered_status)
     // _module->sendCheckReply(F("AT+IFC=2,2"), F("OK"));
 }
 
-void GsmFona::connect()
+void FonaGsm::connect()
 {
     boolean status;
 
@@ -185,7 +185,7 @@ void GsmFona::connect()
     // _serial->flush();
 }
 
-void GsmFona::exitDataMode()
+void FonaGsm::exitDataMode()
 {
 #if defined(KL_DEBUG)
     delay(1050);
@@ -220,7 +220,7 @@ void GsmFona::exitDataMode()
     _module->expectReply(F("OK"), _timeout);
 }
 
-void GsmFona::enterDataMode()
+void FonaGsm::enterDataMode()
 {
 #if defined(KL_DEBUG)
     delay(2050);
@@ -235,7 +235,7 @@ void GsmFona::enterDataMode()
 #endif
 }
 
-size_t GsmFona::getPacket(uint8_t * buffer)
+size_t FonaGsm::getPacket(uint8_t * buffer)
 {
     size_t cnt = 0;
     while (_serial->available())
@@ -244,7 +244,7 @@ size_t GsmFona::getPacket(uint8_t * buffer)
     return cnt;
 }
 
-void GsmFona::serialSend(uint8_t * buffer, int len)
+void FonaGsm::serialSend(uint8_t * buffer, int len)
 {
     _serial->write(buffer, len);
     _serial->flush();
