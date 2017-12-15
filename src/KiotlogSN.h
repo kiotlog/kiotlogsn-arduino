@@ -59,11 +59,10 @@ private:
 
     typedef enum {
         STARTING,
-        CONNECTING,
-        REGISTERING,
-        PUBLISHING,
-        DISCONNECTING,
-        SLEEPING
+        CONNECTED,
+        REGISTERED,
+        PUBLISHED,
+        DISCONNECTED
     } statuses;
 
     statuses _status = STARTING;
@@ -73,10 +72,10 @@ private:
     BufferStream _stream;
 
     void checkForData();
-    void connect();
+    boolean connect();
     uint16_t registerTopic();
     void publish(const uint8_t*, const size_t, const uint8_t*, const size_t);
-    void disconnect();
+    boolean disconnect();
     void lowpower();
 };
 

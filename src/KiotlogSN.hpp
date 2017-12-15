@@ -20,6 +20,7 @@
 #include <KiotlogSN.h>
 
 // #define KL_DEBUG
+// #define Serial Serial1
 
 template <class T>
 KiotlogSN<T>::KiotlogSN(T &gsm, const char *topic, const char *clientid, const uint32_t interval, const boolean preregistered) : _gsm(gsm), _sn(topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
@@ -44,7 +45,7 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
 
     while (!done)
     {
-        #if defined(KL_DEBUG)
+#if defined(KL_DEBUG)
         Serial.println("Checking for data");
 #endif
         checkForData();
@@ -52,45 +53,33 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
         {
         case STARTING:
 #if defined(KL_DEBUG)
-            Serial.println("STARTING");
-#endif
-            connect();
-            _status = CONNECTING;
-            break;
-        case CONNECTING:
-#if defined(KL_DEBUG)
             Serial.println("CONNECTING");
 #endif
-            if (registerTopic() != 0xffff)
-            {
-                _status = REGISTERING;
-            }
+            if (connect())
+                _status = CONNECTED;
             break;
-        case REGISTERING:
+        case CONNECTED:
 #if defined(KL_DEBUG)
             Serial.println("REGISTERING");
 #endif
-            publish(data, data_len, nonce, nonce_len);
-            _status = PUBLISHING;
+            if (registerTopic() != 0xffff)
+                _status = REGISTERED;
             break;
-        case PUBLISHING:
+        case REGISTERED:
 #if defined(KL_DEBUG)
             Serial.println("PUBLISHING");
 #endif
-            disconnect();
-            _status = DISCONNECTING;
+            publish(data, data_len, nonce, nonce_len);
+            _status = PUBLISHED;
             break;
-        case DISCONNECTING:
+        case PUBLISHED:
 #if defined(KL_DEBUG)
             Serial.println("DISCONNECTING");
 #endif
-
-            if (!_sn._client.connected())
-            {
-                _status = SLEEPING;
-            }
+            if (disconnect())
+                _status = DISCONNECTED;
             break;
-        case SLEEPING:
+        case DISCONNECTED:
 #if defined(KL_DEBUG)
             Serial.println("SLEEPING");
 #endif
@@ -99,7 +88,6 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
             done = true;
             break;
         }
-
     }
 }
 
@@ -110,15 +98,9 @@ void KiotlogSN<T>::checkForData()
     uint8_t buffer[512];
     uint8_t *buf = &buffer[0];
 
-    cnt = _gsm.getPacket(buf);
-
-    if (cnt > 0)
-        _sn._client.parse_stream(buf, cnt);
-
-    delay(2000);
-
     while (_sn._client.wait_for_response())
     {
+        delay(500);
         cnt = _gsm.getPacket(buf);
         if (cnt > 0)
             _sn._client.parse_stream(buf, cnt);
@@ -126,10 +108,14 @@ void KiotlogSN<T>::checkForData()
 }
 
 template <class T>
-void KiotlogSN<T>::connect()
+boolean KiotlogSN<T>::connect()
 {
-    if (!_sn._client.connected())
+    boolean connected;
+
+    connected = _sn._client.connected();
+    if (!connected)
         _sn._client.connect(_sn._flags, (uint16_t)10, _sn._id);
+    return connected;
 }
 
 template <class T>
@@ -178,9 +164,14 @@ void KiotlogSN<T>::publish(const uint8_t *data, size_t data_len, const uint8_t *
 }
 
 template <class T>
-void KiotlogSN<T>::disconnect()
+boolean KiotlogSN<T>::disconnect()
 {
-    _sn._client.disconnect(_sn._interval * 2UL + 60);
+    boolean disconnected;
+    disconnected = !_sn._client.connected();
+    
+    if(!disconnected)
+        _sn._client.disconnect(_sn._interval * 2UL + 60);
+    return disconnected;
 }
 
 template <class T>
