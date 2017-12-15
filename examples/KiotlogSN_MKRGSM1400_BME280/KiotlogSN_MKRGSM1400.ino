@@ -1,6 +1,7 @@
 #include <KiotlogSN.h>
 
 #include <MKRGSM.h>
+#include <Adafruit_SleepyDog.h> // You will also need Adafruit_ASFcore library
 #include <Adafruit_BME280.h>
 
 #include "Helpers.h"
@@ -9,6 +10,8 @@
 GSM gsmAccess; // GSM gsmAccess(true);
 GPRS gprsAccess;
 GSMUDP client;
+
+#define TIMEOUT 16 * 1000
 
 //#define apn "hologram"
 #define apn "tm"
@@ -63,27 +66,33 @@ void alarmEvent0 () {
 void loop() {
   uint32_t t0 = millis();
 
+  int timeout = Watchdog.enable(TIMEOUT);
+  Serial1.println("Will reset in " + String(timeout) + "ms.");
+
   Serial1.println("Starting Cellular and Connecting.");
   klsn.start();
+  Watchdog.reset();
 
   Serial1.println("Reading Sensors and Preparing Data.");
   preparePayload();
+  Watchdog.reset();
 
   Serial1.println("Authenticating and Encrypting.");
   aead.authEncrypt((uint8_t *)&payload);
+  Watchdog.reset();
 
   Serial1.println("Sending Message.");
   klsn.sendPayload(
     (uint8_t *)&aead.data, aead.data_len,
     (uint8_t *)&aead.nonce, aead.nonce_len);
+  Watchdog.reset();
 
   Serial1.println("Updating AEAD status.");
   aead.updateStatus();
+  Watchdog.disable();
 
   Serial1.println("Going to Sleep.");
   deepsleep(interval, t0);
-  // delay(interval *  1000);
-
 }
 
 inline void preparePayload()
