@@ -49,7 +49,6 @@ void setup() {
   Serial1.println("Starting.");
 
   analogReadResolution(ADC_RESOLUTION);
-  analogReference(AR_INTERNAL1V0);
 
   bme_init();
   aead.begin(A5);
