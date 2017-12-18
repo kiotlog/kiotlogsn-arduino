@@ -17,61 +17,41 @@
  * along with KiotlogSN for Arduino.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Fona_Helper_h
-#define Fona_Helper_h
+#if defined(ARDUINO_SAMD_MKRGSM1400)
+
+#ifndef MkrGsm_Helper_h
+#define MkrGsm_Helper_h
 #include <Arduino.h>
 
-#include <Adafruit_FONA.h>
+#include <MKRGSM.h>
 
-#include "GsmHelper.h"
+#include "KlsnGsmHelper.h"
 
-typedef enum gsm_modul_enum {
-    FONA_800,
-    FONA_80x,
-    FONA_feather,
-    FONA_debug
-} gsm_module_t;
-
-struct FonaPinout {
-        FonaPinout(uint8_t tx, uint8_t rx, uint8_t key, uint8_t rst, uint8_t dtr):
-            tx(tx), rx(rx), key(key), rst(rst), dtr(dtr) {};
-
-        uint8_t tx;
-        uint8_t rx;
-        uint8_t key;
-        uint8_t rst;
-        uint8_t dtr;
-};
-
-
-class FonaGsm : public GsmBase
+class MkrGsm : public GsmBase
 {
     template<class GsmType> friend class KiotlogSN;
 
 public:
-    FonaGsm() = default;
-    FonaGsm(const gsm_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout& pinout, const char* apn, const char* broker, const uint16_t port);
-    ~FonaGsm() = default;
+    MkrGsm() = default;
+    MkrGsm(GSM& gsmAccess, GPRS& gprsAccess, GSMUDP& client, const char* apn, const char* broker, const uint16_t port);
+    ~MkrGsm() = default;
 
     void start() override;
-    void reset() override;
     void lowpower() override;
-    size_t getPacket(uint8_t * buffer) override;
+    size_t getPacket(uint8_t *) override;
     void serialSend(uint8_t *, int) override;
 
+    void reset()  override { };
+
 protected:
-    void wakeup() override;
+    void wakeup() override { } ;
     void connect() override;
 
-    void transparent(const int registered_status = 5);
-    void enterDataMode();
-    void exitDataMode();
-
 private:
-    FonaPinout _pins;
-    Adafruit_FONA * _module;
-    Stream * _serial;
-    gsm_module_t _model;
+    GSM& _mkr;
+    GPRS& _gprs;
+    GSMUDP& _client;
 };
 
+#endif
 #endif

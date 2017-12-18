@@ -22,8 +22,6 @@
 
 #include <Arduino.h>
 
-
-
 class GsmBase
 {
   public:

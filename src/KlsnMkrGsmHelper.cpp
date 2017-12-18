@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with KiotlogSN for Arduino.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "MkrGsmHelper.h"
+#if defined(ARDUINO_SAMD_MKRGSM1400)
+#include "KlsnMkrGsmHelper.h"
 
 MkrGsm::MkrGsm(GSM &gsmAccess, GPRS &gprsAccess, GSMUDP &client, const char *apn, const char *broker, const uint16_t port) : GsmBase(apn, broker, port), _mkr(gsmAccess), _gprs(gprsAccess), _client(client) {}
 
@@ -64,3 +64,4 @@ void MkrGsm::serialSend(uint8_t *message_buffer, int len)
         _client.endPacket();
     }
 }
+#endif
