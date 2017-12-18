@@ -247,4 +247,5 @@ void FonaGsm::serialSend(uint8_t * buffer, int len)
 {
     _serial->write(buffer, len);
     _serial->flush();
+    delay(500);
 }
