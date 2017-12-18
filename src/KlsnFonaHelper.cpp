@@ -22,7 +22,7 @@
 
 #include "KlsnFonaHelper.h"
 
-#define KL_DEBUG
+// #define KL_DEBUG
 
 FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
     GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) { }
