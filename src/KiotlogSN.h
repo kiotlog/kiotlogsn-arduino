@@ -23,8 +23,6 @@
 #include <Arduino.h>
 #include <mqttsn-messages.h>
 #include <msgpck.h>
-#include "GsmHelpers/FonaHelper.h"
-#include "GsmHelpers/MkrGsmHelper.h"
 #include "Aead/Aead.h"
 
 template <typename GsmType>
@@ -79,7 +77,6 @@ private:
     void lowpower();
 };
 
-// template class KiotlogSN<GsmFona, Aead<8>>;
 #include <KiotlogSN.hpp>
 
 #endif

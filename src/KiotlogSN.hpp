@@ -17,10 +17,8 @@
  * along with KiotlogSN for Arduino.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <KiotlogSN.h>
-
 // #define KL_DEBUG
-// #define Serial Serial1
+// #define Serial SerialUSB
 
 template <class T>
 KiotlogSN<T>::KiotlogSN(T &gsm, const char *topic, const char *clientid, const uint32_t interval, const boolean preregistered) : _gsm(gsm), _sn(topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
@@ -168,7 +166,7 @@ boolean KiotlogSN<T>::disconnect()
 {
     boolean disconnected;
     disconnected = !_sn._client.connected();
-    
+
     if(!disconnected)
         _sn._client.disconnect(_sn._interval * 2UL + 60);
     return disconnected;
