@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BufferStream.h"
 
-BufferStream::BufferStream(uint8_t *buffer, const uint16_t len)
+BufferStream::BufferStream(uint8_t *buffer, const size_t len)
 :_buffer(buffer),_len(len), _buffer_overflow(len>0), _pos(0)
 {
   memset(_buffer, 0, _len);

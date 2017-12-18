@@ -33,19 +33,19 @@ class BufferStream : public Stream
 {
 private:
    uint8_t * _buffer;
-   const uint16_t _len;
+   const size_t _len;
    bool _buffer_overflow;
-   uint16_t _pos;
+   size_t _pos;
 
 public:
   // public methods
-  BufferStream(uint8_t *buffer, const uint16_t len);
+  BufferStream(uint8_t *buffer, const size_t len);
   ~BufferStream() {}
 
   operator const uint8_t *() const { return _buffer; }
   operator const char *() const { return (const char*)_buffer; }
 
-  const uint16_t current_length() const { return _pos; }
+  const size_t current_length() const { return _pos; }
 
   void begin(long speed) {}
   bool listen() { return true; }
