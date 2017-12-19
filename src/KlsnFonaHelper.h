@@ -33,11 +33,8 @@ typedef enum fona_modul_enum {
 } fona_module_t;
 
 struct FonaPinout {
-        FonaPinout(uint8_t tx, uint8_t rx, uint8_t key, uint8_t rst, uint8_t dtr):
-            tx(tx), rx(rx), key(key), rst(rst), dtr(dtr) {};
-
-        uint8_t tx;
-        uint8_t rx;
+        FonaPinout(uint8_t key, uint8_t rst, uint8_t dtr):
+            key(key), rst(rst), dtr(dtr) {};
         uint8_t key;
         uint8_t rst;
         uint8_t dtr;
@@ -63,7 +60,6 @@ public:
 protected:
     void wakeup() override;
     void connect() override;
-
     void transparent(const int registered_status = 5);
 
 private:
