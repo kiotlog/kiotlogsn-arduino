@@ -44,9 +44,8 @@ protected:
     uint16_t _port;
     uint16_t _timeout = 10000;
 
-    void sleep (uint32_t sleep_duration) {
-        extern void KLSN_sleep(uint32_t sleep_duration);
-        KLSN_sleep(sleep_duration);
+    void gsm_wait (uint32_t duration) {
+        delay(duration);
     }
 
     virtual void wakeup() = 0;

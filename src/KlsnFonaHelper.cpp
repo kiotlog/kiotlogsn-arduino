@@ -22,8 +22,6 @@
 
 #include "KlsnFonaHelper.h"
 
-// #define KL_DEBUG
-
 FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
     GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) { }
 
@@ -48,28 +46,11 @@ void FonaGsm::reset()
     pinMode(_pins.rst, OUTPUT);
 
     digitalWrite(_pins.rst, HIGH);
-
-#if defined(KL_DEBUG)
-    delay(10);
-#else
-    sleep(10);
-#endif
-
+    gsm_wait(100);
     digitalWrite(_pins.rst, LOW);
-
-#if defined(KL_DEBUG)
-    delay(2000);
-#else
-    sleep(2000);
-#endif
-
+    gsm_wait(2000);
     digitalWrite(_pins.rst, HIGH);
-
-#if defined(KL_DEBUG)
-    delay(1000);
-#else
-    sleep(1000);
-#endif
+    gsm_wait(1000);
 }
 
 void FonaGsm::lowpower()
@@ -81,28 +62,23 @@ void FonaGsm::lowpower()
 
 void FonaGsm::wakeup()
 {
-    int wait;
+    int waittime;
     switch (_model)
     {
     case FONA_80x:
     case FONA_feather:
-    case FONA_debug:
-        wait = 3000;
+        waittime = 3000;
         break;
     case FONA_800:
-        wait = 5000;
+        waittime = 5000;
         break;
     }
     while (!_module->sendCheckReply(F("AT"), F("AT")))
     {
         digitalWrite(_pins.key, LOW);
-        delay(wait);
+        delay(waittime);
         digitalWrite(_pins.key, HIGH);
-#if defined(KL_DEBUG)
-        delay(1000);
-#else
-        sleep(1000);
-#endif
+        gsm_wait(1000);
     }
 
     _module->sendCheckReply(F("ATE0"), F("OK"));
@@ -115,28 +91,13 @@ void FonaGsm::transparent(const int registered_status)
     if (_model == FONA_feather) _module->sendCheckReply(F("AT&D1"), F("OK"), _timeout);
     // Activate Transparent Mode
     while (!_module->sendCheckReply(F("AT+CIPMODE=1"), F("OK")))
-    {
-#if defined(KL_DEBUG)
-        delay(2000);
-#else
-        sleep(2000);
-#endif
-    }
+        gsm_wait(2000);
 
     // Wait for Network
     while (_module->getNetworkStatus() != registered_status)
-    {
-#if defined(KL_DEBUG)
-        delay(1000);
-#else
-        sleep(1000);
-#endif
-    }
-#if defined(KL_DEBUG)
+        gsm_wait(2000);
     delay(7000);
-#else
-    sleep(7000);
-#endif
+
     // Set APN
     char buf[50];
     char *bufp = &buf[0];
@@ -149,11 +110,7 @@ void FonaGsm::transparent(const int registered_status)
 
     // Activate GPRS
     while (!_module->sendCheckReply(F("AT+CGATT=1"), F("OK"), _timeout))
-#if defined(KL_DEBUG)
-        delay(1000);
-#else
-        sleep(1000);
-#endif
+        gsm_wait(1000);
 
     // Activate Wireless
     _module->sendCheckReply(F("AT+CIICR"), F("OK"), _timeout);
@@ -181,27 +138,17 @@ void FonaGsm::connect()
     // Connect UDP
     _module->sendCheckReply(cs, F("OK"), _timeout);
     _module->expectReply(F("CONNECT"), _timeout);
-    // _serial->flush();
 }
 
 void FonaGsm::exitDataMode()
 {
-#if defined(KL_DEBUG)
-    delay(1050);
-#else
-    sleep(1050);
-#endif
+    gsm_wait(1050);
 
     switch (_model)
     {
     case FONA_feather:
-    case FONA_debug:
         digitalWrite(_pins.dtr, LOW);
-#if defined(KL_DEBUG)
-        delay(1050);
-#else
-        sleep(1050);
-#endif
+        gsm_wait(1050);
         digitalWrite(_pins.dtr, HIGH);
         break;
     case FONA_80x:
@@ -209,29 +156,15 @@ void FonaGsm::exitDataMode()
         _serial->print("+++");
         break;
     }
-
-#if defined(KL_DEBUG)
-    delay(1050);
-#else
-    sleep(1050);
-#endif
-
+    gsm_wait(1050);
     _module->expectReply(F("OK"), _timeout);
 }
 
 void FonaGsm::enterDataMode()
 {
-#if defined(KL_DEBUG)
-    delay(2050);
-#else
-    sleep(2050);
-#endif
+    gsm_wait(2050);
     _module->sendCheckReply(F("ATO"), F("CONNECT"), _timeout);
-#if defined(KL_DEBUG)
-    delay(2050);
-#else
-    sleep(2050);
-#endif
+    gsm_wait(2050);
 }
 
 size_t FonaGsm::getPacket(uint8_t * buffer)

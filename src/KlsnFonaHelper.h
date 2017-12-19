@@ -60,6 +60,7 @@ public:
 protected:
     void wakeup() override;
     void connect() override;
+
     void transparent(const int registered_status = 5);
 
 private:
