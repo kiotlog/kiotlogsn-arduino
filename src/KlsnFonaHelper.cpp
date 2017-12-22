@@ -22,19 +22,15 @@
 
 #include "KlsnFonaHelper.h"
 
-FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA * fona, Stream &fonaSS, const FonaPinout &pinout, const char* apn, const char* broker, const uint16_t port) :
-    GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) { }
+FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA *fona, Stream &fonaSS, const FonaPinout &pinout, const char *apn, const char *broker, const uint16_t port)
+    : GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) {}
 
 void FonaGsm::start()
 {
-    pinMode(_pins.key, OUTPUT);
     pinMode(_pins.rst, OUTPUT);
     pinMode(_pins.dtr, OUTPUT);
 
     digitalWrite(_pins.dtr, HIGH);
-    digitalWrite(_pins.key, HIGH);
-    delay(10);
-    digitalWrite(_pins.key, LOW);
 
     wakeup();
     transparent();
@@ -53,16 +49,36 @@ void FonaGsm::reset()
     gsm_wait(1000);
 }
 
-void FonaGsm::lowpower()
+void FonaGsm::powerdown()
 {
-    digitalWrite(_pins.key, LOW);
-    delay(3000);
-    digitalWrite(_pins.key, HIGH);
+    pinMode(_pins.ps, INPUT);
+    pinMode(_pins.key, OUTPUT);
+    for (int i=0; i < 2; i++){
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(35);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(25);
+    }
+
+    while (digitalRead(_pins.ps)) {
+        digitalWrite(_pins.key, LOW);
+        delay(3000);
+        digitalWrite(_pins.key, HIGH);
+        delay(1000);
+    }
 }
 
-void FonaGsm::wakeup()
+void FonaGsm::lowpower()
+{
+    powerdown();
+}
+
+void FonaGsm::powerup()
 {
     int waittime;
+    pinMode(_pins.ps, INPUT);
+    pinMode(_pins.key, OUTPUT);
+
     switch (_model)
     {
     case FONA_80x:
@@ -73,14 +89,25 @@ void FonaGsm::wakeup()
         waittime = 5000;
         break;
     }
-    while (!_module->sendCheckReply(F("AT"), F("AT")))
+
+    for (int i=0; i < 3; i++){
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(35);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(25);
+    }
+
+    while (!digitalRead(_pins.ps))
     {
         digitalWrite(_pins.key, LOW);
         delay(waittime);
         digitalWrite(_pins.key, HIGH);
-        gsm_wait(1000);
+        delay(1000);
     }
-
+}
+void FonaGsm::wakeup()
+{
+    powerup();
     _module->sendCheckReply(F("ATE0"), F("OK"));
     _module->sendCheckReply(F("AT+CVHU=0"), F("OK"));
 }
@@ -88,29 +115,40 @@ void FonaGsm::wakeup()
 void FonaGsm::transparent(const int registered_status)
 {
     // Enable exiting Data Mode with DTR pin
-    if (_model == FONA_feather) _module->sendCheckReply(F("AT&D1"), F("OK"), _timeout);
+    if (_model == FONA_feather)
+        _module->sendCheckReply(F("AT&D1"), F("OK"), _timeout);
+
     // Activate Transparent Mode
     while (!_module->sendCheckReply(F("AT+CIPMODE=1"), F("OK")))
-        gsm_wait(2000);
+        delay(500);
+
+    // Shutdown all sockets
+    _module->sendCheckReply(F("AT+CIPSHUT"), F("SHUT OK"), 20000);
 
     // Wait for Network
     while (_module->getNetworkStatus() != registered_status)
-        gsm_wait(2000);
-    delay(7000);
+        delay(500);
+
+    // Set GPRS Context
+    while (!_module->sendCheckReply(F("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\""), F("OK"), _timeout))
+        delay(500);
 
     // Set APN
-    char buf[50];
-    char *bufp = &buf[0];
+    String buf = "AT+SAPBR=3,1,\"APN\",\""; buf += _apn; buf += "\"";
+    while (!_module->sendCheckReply((char *)buf.c_str(), F("OK"), _timeout))
+        delay(500);
 
-    bufp += sprintf(bufp, "AT+CSTT=\"");
-    bufp += sprintf(bufp, _apn);
-    bufp += sprintf(bufp, "\"");
+    buf = "AT+CSTT=\""; buf += _apn; buf += "\"";
+    while (!_module->sendCheckReply((char *)buf.c_str(), F("OK"), _timeout))
+        delay(500);
 
-    _module->sendCheckReply(buf, F("OK"), _timeout);
+    // Check for GPRS Context
+    while (!_module->sendCheckReply(F("AT+SAPBR=1,1"), F("OK"), 30000))
+        delay(500);
 
     // Activate GPRS
     while (!_module->sendCheckReply(F("AT+CGATT=1"), F("OK"), _timeout))
-        gsm_wait(1000);
+        gsm_wait(500);
 
     // Activate Wireless
     _module->sendCheckReply(F("AT+CIICR"), F("OK"), _timeout);
@@ -167,7 +205,7 @@ void FonaGsm::enterDataMode()
     gsm_wait(2050);
 }
 
-size_t FonaGsm::getPacket(uint8_t * buffer)
+size_t FonaGsm::getPacket(uint8_t *buffer)
 {
     size_t cnt = 0;
     while (_serial->available())
@@ -176,7 +214,7 @@ size_t FonaGsm::getPacket(uint8_t * buffer)
     return cnt;
 }
 
-void FonaGsm::serialSend(uint8_t * buffer, int len)
+void FonaGsm::serialSend(uint8_t *buffer, int len)
 {
     _serial->write(buffer, len);
     _serial->flush();

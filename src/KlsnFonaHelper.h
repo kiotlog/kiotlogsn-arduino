@@ -33,11 +33,12 @@ typedef enum fona_modul_enum {
 } fona_module_t;
 
 struct FonaPinout {
-        FonaPinout(uint8_t key, uint8_t rst, uint8_t dtr):
-            key(key), rst(rst), dtr(dtr) {};
+        FonaPinout(uint8_t key, uint8_t rst, uint8_t dtr, uint8_t ps):
+            key(key), rst(rst), dtr(dtr), ps(ps) {};
         uint8_t key;
         uint8_t rst;
         uint8_t dtr;
+        uint8_t ps;
 };
 
 class FonaGsm : public GsmBase
@@ -54,13 +55,13 @@ public:
     void lowpower() override;
     size_t getPacket(uint8_t * buffer) override;
     void serialSend(uint8_t *, int) override;
-    void enterDataMode();
-    void exitDataMode();
-
-protected:
     void wakeup() override;
     void connect() override;
 
+    void enterDataMode();
+    void exitDataMode();
+    void powerup();
+    void powerdown();
     void transparent(const int registered_status = 5);
 
 private:
