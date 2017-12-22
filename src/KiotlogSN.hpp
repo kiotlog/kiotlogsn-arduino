@@ -27,9 +27,9 @@ template <class T>
 KiotlogSN<T>::Sn::Sn(const char *topic, const char *clientid, const uint32_t interval, const boolean pre) : _id(clientid), _topic(topic), _interval(interval), _pre(pre) {}
 
 template <class T>
-void KiotlogSN<T>::start()
+void KiotlogSN<T>::start(boolean start_gsm)
 {
-    _gsm.start();
+    if (start_gsm) _gsm.start();
 }
 
 template <class T>

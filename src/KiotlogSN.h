@@ -34,7 +34,7 @@ public:
     KiotlogSN(GsmType &gsm, const char* topic, const char* clientid, const uint32_t interval, const boolean preregistered = false);
     ~KiotlogSN() = default;
 
-    void start();
+    void start(boolean start_gsm = true);
     void sendPayload(const uint8_t *, const size_t, const uint8_t *, const size_t);
 
     class Sn {
