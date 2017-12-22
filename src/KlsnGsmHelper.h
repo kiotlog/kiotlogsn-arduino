@@ -37,6 +37,8 @@ class GsmBase
     virtual void lowpower() = 0;
     virtual size_t getPacket(uint8_t *) = 0;
     virtual void serialSend(uint8_t *, int) = 0;
+    virtual void wakeup() = 0;
+    virtual void connect() = 0;
 
 protected:
     const char * _apn;
@@ -48,8 +50,6 @@ protected:
         delay(duration);
     }
 
-    virtual void wakeup() = 0;
-    virtual void connect() = 0;
 };
 
 
