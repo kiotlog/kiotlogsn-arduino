@@ -180,7 +180,7 @@ void FonaGsm::connect()
 
 void FonaGsm::exitDataMode()
 {
-    gsm_wait(1050);
+    delay(1050);
 
     switch (_model)
     {
@@ -194,15 +194,15 @@ void FonaGsm::exitDataMode()
         _serial->print("+++");
         break;
     }
-    gsm_wait(1050);
+    delay(1050);
     _module->expectReply(F("OK"), _timeout);
 }
 
 void FonaGsm::enterDataMode()
 {
-    gsm_wait(2050);
+    delay(2050);
     _module->sendCheckReply(F("ATO"), F("CONNECT"), _timeout);
-    gsm_wait(2050);
+    delay(2050);
 }
 
 size_t FonaGsm::getPacket(uint8_t *buffer)
