@@ -1,4 +1,5 @@
 #include <KiotlogSN.h>
+#include <KlsnMkrGsmHelper.h>
 
 #include <MKRGSM.h>
 #include <Adafruit_SleepyDog.h> // You will also need Adafruit_ASFcore library
