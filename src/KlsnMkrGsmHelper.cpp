@@ -34,7 +34,7 @@ void MkrGsm::connect()
         if ((_mkr.begin() == GSM_READY) && (_gprs.attachGPRS(_apn, "", "") == GPRS_READY))
             connected = true;
         else
-            sleep(1000);
+            delay(1000);
     }
     _client.begin(_port);
 }
