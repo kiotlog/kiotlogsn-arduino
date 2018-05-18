@@ -21,19 +21,31 @@
 // #define Serial SerialUSB
 
 template <class T>
-KiotlogSN<T>::KiotlogSN(T &gsm, const char *topic, const char *clientid, const uint32_t interval, const boolean preregistered) : _gsm(gsm), _sn(topic, clientid, interval, preregistered), _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE) {}
-
-template <class T>
-KiotlogSN<T>::Sn::Sn(const char *topic, const char *clientid, const uint32_t interval, const boolean pre) : _id(clientid), _topic(topic), _interval(interval), _pre(pre) {}
-
-template <class T>
-void KiotlogSN<T>::start(boolean start_gsm)
+KiotlogSN<T>::KiotlogSN(
+    T& gsm, const char* topic, const char* clientid, const uint32_t interval, const boolean preregistered)
+    : _gsm(gsm)
+    , _sn(topic, clientid, interval, preregistered)
+    , _stream(_stream_buffer, BUFFER_SERIAL_BUFFER_SIZE)
 {
-    if (start_gsm) _gsm.start();
 }
 
 template <class T>
-void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8_t *nonce, size_t nonce_len)
+KiotlogSN<T>::Sn::Sn(const char* topic, const char* clientid, const uint32_t interval, const boolean pre)
+    : _id(clientid)
+    , _topic(topic)
+    , _interval(interval)
+    , _pre(pre)
+{
+}
+
+template <class T> void KiotlogSN<T>::start(boolean start_gsm)
+{
+    if (start_gsm)
+        _gsm.start();
+}
+
+template <class T>
+void KiotlogSN<T>::sendPayload(const uint8_t* data, size_t data_len, const uint8_t* nonce, size_t nonce_len)
 {
     boolean done = false;
 
@@ -41,14 +53,12 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
     Serial.println("Sending Loop");
 #endif
 
-    while (!done)
-    {
+    while (!done) {
 #if defined(KL_DEBUG)
         Serial.println("Checking for data");
 #endif
         checkForData();
-        switch (_status)
-        {
+        switch (_status) {
         case STARTING:
 #if defined(KL_DEBUG)
             Serial.println("CONNECTING");
@@ -89,15 +99,13 @@ void KiotlogSN<T>::sendPayload(const uint8_t *data, size_t data_len, const uint8
     }
 }
 
-template <class T>
-void KiotlogSN<T>::checkForData()
+template <class T> void KiotlogSN<T>::checkForData()
 {
     uint16_t cnt = 0;
     uint8_t buffer[512];
-    uint8_t *buf = &buffer[0];
+    uint8_t* buf = &buffer[0];
 
-    while (_sn._client.wait_for_response())
-    {
+    while (_sn._client.wait_for_response()) {
         delay(500);
         cnt = _gsm.getPacket(buf);
         if (cnt > 0)
@@ -105,8 +113,7 @@ void KiotlogSN<T>::checkForData()
     }
 }
 
-template <class T>
-boolean KiotlogSN<T>::connect()
+template <class T> boolean KiotlogSN<T>::connect()
 {
     boolean connected;
 
@@ -116,29 +123,20 @@ boolean KiotlogSN<T>::connect()
     return connected;
 }
 
-template <class T>
-uint16_t KiotlogSN<T>::registerTopic()
+template <class T> uint16_t KiotlogSN<T>::registerTopic()
 {
     uint8_t index;
-    if (_sn._pre)
-    {
+    if (_sn._pre) {
         _sn._topic_id = (uint16_t)atoi(_sn._topic);
         _sn._flags |= FLAG_TOPIC_PREDEFINED_ID;
-    }
-    else if (strlen(_sn._topic) == 2)
-    {
+    } else if (strlen(_sn._topic) == 2) {
         _sn._topic_id = (_sn._topic[0] << 8) + _sn._topic[1];
         _sn._flags |= FLAG_TOPIC_SHORT_NAME;
-    }
-    else
-    {
+    } else {
         _sn._topic_id = (uint16_t)_sn._client.find_topic_id(_sn._topic, &index);
-        if (_sn._topic_id == 0xffff)
-        {
+        if (_sn._topic_id == 0xffff) {
             _sn._client.register_topic(_sn._topic);
-        }
-        else
-        {
+        } else {
             _sn._flags |= FLAG_TOPIC_NAME;
         }
     }
@@ -146,34 +144,29 @@ uint16_t KiotlogSN<T>::registerTopic()
 }
 
 template <class T>
-void KiotlogSN<T>::publish(const uint8_t *data, size_t data_len, const uint8_t *nonce, size_t nonce_len)
+void KiotlogSN<T>::publish(const uint8_t* data, size_t data_len, const uint8_t* nonce, size_t nonce_len)
 {
     msgpck_write_map_header(&_stream, 2);
     msgpck_write_string(&_stream, "nonce");
-    msgpck_write_bin(&_stream, (byte *)nonce, nonce_len);
+    msgpck_write_bin(&_stream, (byte*)nonce, nonce_len);
     msgpck_write_string(&_stream, "data");
-    msgpck_write_bin(&_stream, (byte *)data, data_len);
+    msgpck_write_bin(&_stream, (byte*)data, data_len);
 
     size_t len = _stream.available();
-    const uint8_t *s = _stream;
+    const uint8_t* s = _stream;
 
     _sn._client.publish(_sn._flags, _sn._topic_id, s, len);
     _stream.flush();
 }
 
-template <class T>
-boolean KiotlogSN<T>::disconnect()
+template <class T> boolean KiotlogSN<T>::disconnect()
 {
     boolean disconnected;
     disconnected = !_sn._client.connected();
 
-    if(!disconnected)
+    if (!disconnected)
         _sn._client.disconnect(_sn._interval * 2UL + 60);
     return disconnected;
 }
 
-template <class T>
-void KiotlogSN<T>::lowpower()
-{
-    _gsm.lowpower();
-}
+template <class T> void KiotlogSN<T>::lowpower() { _gsm.lowpower(); }

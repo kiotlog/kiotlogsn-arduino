@@ -17,13 +17,20 @@
  * along with KiotlogSN for Arduino.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Arduino.h>
 #include <Adafruit_FONA.h>
+#include <Arduino.h>
 
 #include "KlsnFonaHelper.h"
 
-FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA *fona, Stream &fonaSS, const FonaPinout &pinout, const char *apn, const char *broker, const uint16_t port)
-    : GsmBase(apn, broker, port), _model(model), _pins(pinout), _module(fona), _serial(&fonaSS) {}
+FonaGsm::FonaGsm(const fona_module_t model, Adafruit_FONA* fona, Stream& fonaSS, const FonaPinout& pinout,
+    const char* apn, const char* broker, const uint16_t port)
+    : GsmBase(apn, broker, port)
+    , _model(model)
+    , _pins(pinout)
+    , _module(fona)
+    , _serial(&fonaSS)
+{
+}
 
 void FonaGsm::start()
 {
@@ -53,7 +60,7 @@ void FonaGsm::powerdown()
 {
     pinMode(_pins.ps, INPUT);
     pinMode(_pins.key, OUTPUT);
-    for (int i=0; i < 2; i++){
+    for (int i = 0; i < 2; i++) {
         digitalWrite(LED_BUILTIN, HIGH);
         delay(35);
         digitalWrite(LED_BUILTIN, LOW);
@@ -68,10 +75,7 @@ void FonaGsm::powerdown()
     }
 }
 
-void FonaGsm::lowpower()
-{
-    powerdown();
-}
+void FonaGsm::lowpower() { powerdown(); }
 
 void FonaGsm::powerup()
 {
@@ -79,8 +83,7 @@ void FonaGsm::powerup()
     pinMode(_pins.ps, INPUT);
     pinMode(_pins.key, OUTPUT);
 
-    switch (_model)
-    {
+    switch (_model) {
     case FONA_80x:
     case FONA_feather:
         waittime = 3000;
@@ -90,15 +93,14 @@ void FonaGsm::powerup()
         break;
     }
 
-    for (int i=0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         digitalWrite(LED_BUILTIN, HIGH);
         delay(35);
         digitalWrite(LED_BUILTIN, LOW);
         delay(25);
     }
 
-    while (!digitalRead(_pins.ps))
-    {
+    while (!digitalRead(_pins.ps)) {
         digitalWrite(_pins.key, LOW);
         delay(waittime);
         digitalWrite(_pins.key, HIGH);
@@ -134,12 +136,16 @@ void FonaGsm::transparent(const int registered_status)
         delay(500);
 
     // Set APN
-    String buf = "AT+SAPBR=3,1,\"APN\",\""; buf += _apn; buf += "\"";
-    while (!_module->sendCheckReply((char *)buf.c_str(), F("OK"), _timeout))
+    String buf = "AT+SAPBR=3,1,\"APN\",\"";
+    buf += _apn;
+    buf += "\"";
+    while (!_module->sendCheckReply((char*)buf.c_str(), F("OK"), _timeout))
         delay(500);
 
-    buf = "AT+CSTT=\""; buf += _apn; buf += "\"";
-    while (!_module->sendCheckReply((char *)buf.c_str(), F("OK"), _timeout))
+    buf = "AT+CSTT=\"";
+    buf += _apn;
+    buf += "\"";
+    while (!_module->sendCheckReply((char*)buf.c_str(), F("OK"), _timeout))
         delay(500);
 
     // Check for GPRS Context
@@ -165,7 +171,7 @@ void FonaGsm::connect()
     boolean status;
 
     char cs[100];
-    char *csp = &cs[0];
+    char* csp = &cs[0];
 
     csp += sprintf(csp, "AT+CIPSTART=\"UDP\",\"");
     csp += sprintf(csp, _broker);
@@ -182,8 +188,7 @@ void FonaGsm::exitDataMode()
 {
     delay(1050);
 
-    switch (_model)
-    {
+    switch (_model) {
     case FONA_feather:
         digitalWrite(_pins.dtr, LOW);
         gsm_wait(1050);
@@ -205,7 +210,7 @@ void FonaGsm::enterDataMode()
     delay(2050);
 }
 
-size_t FonaGsm::getPacket(uint8_t *buffer)
+size_t FonaGsm::getPacket(uint8_t* buffer)
 {
     size_t cnt = 0;
     while (_serial->available())
@@ -214,7 +219,7 @@ size_t FonaGsm::getPacket(uint8_t *buffer)
     return cnt;
 }
 
-void FonaGsm::serialSend(uint8_t *buffer, int len)
+void FonaGsm::serialSend(uint8_t* buffer, int len)
 {
     _serial->write(buffer, len);
     _serial->flush();
