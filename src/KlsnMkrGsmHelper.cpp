@@ -19,18 +19,22 @@
 #if defined(ARDUINO_SAMD_MKRGSM1400)
 #include "KlsnMkrGsmHelper.h"
 
-MkrGsm::MkrGsm(GSM &gsmAccess, GPRS &gprsAccess, GSMUDP &client, const char *apn, const char *broker, const uint16_t port) : GsmBase(apn, broker, port), _mkr(gsmAccess), _gprs(gprsAccess), _client(client) {}
-
-void MkrGsm::start()
+MkrGsm::MkrGsm(
+    GSM& gsmAccess, GPRS& gprsAccess, GSMUDP& client, const char* apn, const char* broker, const uint16_t port)
+    : GsmBase(apn, broker, port)
+    , _mkr(gsmAccess)
+    , _gprs(gprsAccess)
+    , _client(client)
 {
-    connect();
 }
+
+void MkrGsm::start() { connect(); }
 
 void MkrGsm::connect()
 {
     boolean connected = false;
 
-    while (!connected){
+    while (!connected) {
         if ((_mkr.begin() == GSM_READY) && (_gprs.attachGPRS(_apn, "", "") == GPRS_READY))
             connected = true;
         else
@@ -46,7 +50,7 @@ void MkrGsm::lowpower()
     _mkr.shutdown();
 }
 
-size_t MkrGsm::getPacket(uint8_t *buffer)
+size_t MkrGsm::getPacket(uint8_t* buffer)
 {
     size_t bytes, cnt = 0;
     if (_client.parsePacket())
@@ -55,10 +59,9 @@ size_t MkrGsm::getPacket(uint8_t *buffer)
     return cnt;
 }
 
-void MkrGsm::serialSend(uint8_t *message_buffer, int len)
+void MkrGsm::serialSend(uint8_t* message_buffer, int len)
 {
-    if (len > 0)
-    {
+    if (len > 0) {
         _client.beginPacket(_broker, _port);
         _client.write(message_buffer, len);
         _client.endPacket();
